@@ -25,16 +25,11 @@ class LoadBalancer(Thread):
         self.start()
         return self
     
+    def stop(self):
+        self._killed = True
+    
     def setController(self, controller: Controller):
         self._controller = controller
-
-    def _chooseVirtualMachine(self, item: Request) -> VirtualMachine:
-        print(f'Querying VMs...')
-        print(f'Found VM: {self._virtualMachines[0]}.')
-        return self._virtualMachines[0]
-
-    def _respondToController(self, virtualMachine: VirtualMachine):
-        self._controller.setVirtualMachineForRequest(virtualMachine)
 
     def sendRequest(self, request: Request):
         print('Received request from controller')
@@ -51,5 +46,10 @@ class LoadBalancer(Thread):
                 if self._killed == True:
                     break
     
-    def stop(self):
-        self._killed = True
+    def _chooseVirtualMachine(self, item: Request) -> VirtualMachine:
+        print(f'Querying VMs...')
+        print(f'Found VM: {self._virtualMachines[0]}.')
+        return self._virtualMachines[0]
+
+    def _respondToController(self, virtualMachine: VirtualMachine):
+        self._controller.setVirtualMachineForRequest(virtualMachine)
