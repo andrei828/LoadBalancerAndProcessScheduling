@@ -4,6 +4,8 @@ from controller import Controller
 from threading import Thread
 from typing import List
 import threading, queue
+import random
+import time
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -11,45 +13,58 @@ if TYPE_CHECKING:
 
 class LoadBalancer(Thread):
     
-    def __init__(self, virtualMachines: List[VirtualMachine]):
+    def __init__(self, virtualMachines: List[VirtualMachine] = None):
         Thread.__init__(self)
         self._killed = False
         self._queue = queue.Queue()
         self._virtualMachines = virtualMachines
-
+    
     def __del__(self):
         # wait for tasks to finish
         self._queue.join()
     
     def initialize(self) -> LoadBalancer:
+        self._virtualMachinesDictionary = {}
+        for virtualMachine in self._virtualMachines:
+            virtualMachine.setLoadBalancer(self)
+            self._virtualMachinesDictionary[virtualMachine] = virtualMachine.runningPercentage
+
         self.start()
         return self
     
     def stop(self):
         self._killed = True
+        for virtualMachine in self._virtualMachines:
+            virtualMachine.stop()
     
     def setController(self, controller: Controller):
         self._controller = controller
+        for virtualMachine in self._virtualMachines:
+            virtualMachine.setController(controller)
 
-    def sendRequest(self, request: Request):
+    def receiveRequest(self, request: Request):
         print('Received request from controller')
-        self._queue.put(request)
-
+        vm = self._chooseVirtualMachine(request)
+        self._respondToController(request, vm)
+    
     def run(self):
         while True:
-            try:
-                item = self._queue.get(True, 2)
-                vm = self._chooseVirtualMachine(item)
-                self._respondToController(vm)
-                self._queue.task_done()
-            except queue.Empty:
-                if self._killed == True:
-                    break
+            time.sleep(1)
+            self._pingVirtualMachines()
+            if self._killed == True:
+                break
     
     def _chooseVirtualMachine(self, item: Request) -> VirtualMachine:
         print(f'Querying VMs...')
-        print(f'Found VM: {self._virtualMachines[0]}.')
-        return self._virtualMachines[0]
+        # TODO: implement the algorithm for choosing VMs
+        vm = self._virtualMachines[random.randint(0, len(self._virtualMachines) - 1)]
+        print(f'Found VM: {vm}.')
+        return vm
 
-    def _respondToController(self, virtualMachine: VirtualMachine):
-        self._controller.setVirtualMachineForRequest(virtualMachine)
+    def _respondToController(self, request: Request, virtualMachine: VirtualMachine):
+        self._controller.receiveLoadBalancerDecision(request, virtualMachine)
+    
+    def _pingVirtualMachines(self):
+        # TODO: find a thread safe solution
+        for virtualMachine in self._virtualMachines:
+            self._virtualMachinesDictionary[virtualMachine] = virtualMachine.runningPercentage

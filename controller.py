@@ -29,26 +29,28 @@ class Controller(Thread):
     def setLoadBalancer(self, loadBalancer: LoadBalancer):
         self._loadBalancer = loadBalancer
 
-    def sendRequest(self, request: Request):
-        print("Received request from client")
+    def receiveRequest(self, request: Request):
         self._queue.put(request)
+
+    def receiveResponseFromVm(self, request: Request, virtualMachine: VirtualMachine):
+        print("Done request")
     
-    def setVirtualMachineForRequest(self, virtualMachine: VirtualMachine):
+    def receiveLoadBalancerDecision(self, request: Request, virtualMachine: VirtualMachine):
         print(f'Chossing VM: {virtualMachine}.')
         self._queue.task_done()
+        self._sendToVm(request, virtualMachine)
 
     def run(self):
         while True:
             try:
-                item = self._queue.get(True, 2)
-                self._queryLoadBalancer(item)
+                request = self._queue.get(True, 2)
+                self._queryLoadBalancer(request)
             except queue.Empty:
                 if self._killed == True:
                     break
     
-    def _queryLoadBalancer(self, item: Request):
-        self._loadBalancer.sendRequest(item)
-
+    def _queryLoadBalancer(self, request: Request):
+        self._loadBalancer.receiveRequest(request)
     
-
-    
+    def _sendToVm(self, request: Request, virtualMachine: VirtualMachine):
+        virtualMachine.receiveRequest(request)
