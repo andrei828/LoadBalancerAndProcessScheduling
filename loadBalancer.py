@@ -17,22 +17,17 @@ class LoadBalancer(Thread):
     def __init__(self, virtualMachines: List[VirtualMachine] = None):
         Thread.__init__(self)
         self._killed = False
-        self._queue = queue.Queue()
         self._virtualMachines = virtualMachines
         self._logger = open(f'logs/LoadBalancer.log', 'a')
-    
-    def __del__(self):
-        # wait for tasks to finish
-        self._queue.join()
-    
+
     def initialize(self) -> LoadBalancer:
         self._virtualMachinesDictionary = {}
         for virtualMachine in self._virtualMachines:
             virtualMachine.setLoadBalancer(self)
             self._virtualMachinesDictionary[virtualMachine] = virtualMachine.runningPercentage
 
-        self.start()
         self._printLog(f'Starting Load Balancer...')
+        self.start()
         return self
     
     def stop(self):
@@ -54,10 +49,11 @@ class LoadBalancer(Thread):
     
     def run(self):
         while True:
-            time.sleep(1)
             self._pingVirtualMachines()
+            time.sleep(1)
             if self._killed == True:
                 break
+        self._printLog(f'Load Balancer stopped.')
     
     def _chooseVirtualMachine(self, item: Request) -> VirtualMachine:
         print(f'Querying VMs for the best match...')
@@ -75,7 +71,7 @@ class LoadBalancer(Thread):
         self._controller.receiveLoadBalancerDecision(request, virtualMachine)
     
     def _pingVirtualMachines(self):
-        print(f'Pinging Virtual Machines to check their health and load.')
+        self._printLog(f'Pinging Virtual Machines to check their health and load.')
         # TODO: find a thread safe solution 
         for virtualMachine in self._virtualMachines:
             self._virtualMachinesDictionary[virtualMachine] = virtualMachine.runningPercentage

@@ -54,6 +54,7 @@ class Controller(Thread):
             except queue.Empty:
                 if self._killed == True:
                     break
+        self._printLog(f'Controller stopped.')
     
     def _queryLoadBalancer(self, request: Request):
         self._printLog(f'Querying Load Balancer for request [{request.name}]')
