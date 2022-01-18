@@ -2,25 +2,43 @@
   <mat-toolbar>
     <span>Monitor</span>
   </mat-toolbar>
-  <mat-grid-list cols="3" rows="2" class="main-content">
-    <mat-grid-tile colspan="2" rowspan="2">
-      <div class="tile-content">[chart]</div>
-    </mat-grid-tile>
-    <mat-grid-tile>
-      <div class="tile-content toolbar-view">
-        <mat-toolbar>Send requests</mat-toolbar>
-        <div class="main-content">
-
+  <div class="main-content container" #container>
+    <mat-grid-list cols="3" rows="2" [rowHeight]="rowHeigth">
+      <mat-grid-tile colspan="2" rowspan="2">
+        <div class="tile-content">[chart]</div>
+      </mat-grid-tile>
+      <mat-grid-tile>
+        <div class="tile-content toolbar-view">
+          <mat-toolbar>
+            <span>Send request</span>
+            <span class="spacer"></span>
+            <button mat-raised-button>Send</button>
+          </mat-toolbar>
+          <form class="main-content request-container" [formGroup]="sendRequestForm">
+            <div class="tasks-header">
+              <h3>Tasks</h3>
+              <button mat-raised-button (click)="addTask()">Add task</button>
+            </div>
+            <div formArrayName="tasks" class="tasks-container">
+              <mat-card *ngFor="let task of taskFormArray.controls; let index = index" [formGroupName]="index" class="task">
+                <span class="task-name">Task {{ index + 1 }}</span>
+                <mat-form-field class="task-duration">
+                  <mat-label>Duration</mat-label>
+                  <input matInput type="number" formControlName="duration" />
+                </mat-form-field>
+              </mat-card> 
+            </div>
+          </form>
         </div>
-      </div>
-    </mat-grid-tile>
-    <mat-grid-tile>
-      <div class="tile-content toolbar-view">
-        <mat-toolbar>Logs</mat-toolbar>
-        <div class="main-content logs-container">
-          Test log
+      </mat-grid-tile>
+      <mat-grid-tile>
+        <div class="tile-content toolbar-view">
+          <mat-toolbar>Logs</mat-toolbar>
+          <div class="main-content logs-container">
+            Test log
+          </div>
         </div>
-      </div>
-    </mat-grid-tile>
-  </mat-grid-list>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
 </div>

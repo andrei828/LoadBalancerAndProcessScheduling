@@ -1,8 +1,5 @@
-
-
 mat-grid-list {
   background: #000;
-  padding-top: 20px;
 
   mat-grid-tile {
     background: #303030; 
@@ -14,7 +11,35 @@ mat-grid-list {
   }
 }
 
+.request-container {
+  padding: 16px;
+  .tasks-header {
+    display: flex;
+    align-items: center;
+    h3 {
+      flex: 1;
+      margin: 0;
+    }
+  }
+
+  .tasks-container {
+    mat-card.task {
+      padding: 8px 16px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      .task-name {
+        flex: 1;
+      }
+      .task-duration {
+        max-width: 75px;
+        height: 48px;
+      }
+    }
+  }
+}
+
 .logs-container {
   font-family: 'Courier New', Courier, monospace;
-  padding: 4px;
+  padding: 8px;
 }
