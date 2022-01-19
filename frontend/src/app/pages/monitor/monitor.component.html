@@ -2,19 +2,33 @@
   <mat-toolbar>
     <span>Monitor</span>
     <span class="spacer"></span>
-    <button mat-raised-button>Reconfigure</button>
+    <button mat-raised-button (click)="configure()">Reconfigure</button>
   </mat-toolbar>
   <div class="main-content container" #container>
     <mat-grid-list cols="3" rows="2" [rowHeight]="rowHeigth">
       <mat-grid-tile colspan="2" rowspan="2">
-        <div class="tile-content">[chart]</div>
+        <div class="tile-content">
+          <ngx-charts-bar-vertical
+            [results]="vmDataArray"
+            [xAxis]="true"
+            [yAxis]="true"
+            theme="dark"
+            [legend]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            [yScaleMin]="0"
+            xAxisLabel="VMs"
+            yAxisLabel="Load Percentage"
+          >
+          </ngx-charts-bar-vertical>
+        </div>
       </mat-grid-tile>
       <mat-grid-tile>
         <div class="tile-content toolbar-view">
           <mat-toolbar>
             <span>Send request</span>
             <span class="spacer"></span>
-            <button mat-raised-button>Send</button>
+            <button mat-raised-button (click)="sendRequest()" [disabled]="sendRequestForm.invalid">Send</button>
           </mat-toolbar>
           <form class="main-content request-container" [formGroup]="sendRequestForm">
             <div class="tasks-header">
