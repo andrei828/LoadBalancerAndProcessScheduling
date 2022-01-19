@@ -1,13 +1,15 @@
 from __future__ import annotations
 from datetime import datetime
 from threading import Thread, Lock
+from logger import Logger
+from logging_level import LoggingLevel
 from request import Request
 import queue
 import uuid
 import json
 import time
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from loadBalancer import LoadBalancer
     from controller import Controller
@@ -19,20 +21,20 @@ class VirtualMachine(Thread):
         self._killed = False
         self.runningPercentage = 0
         self._queue = queue.Queue()
-        self._logger = open(f'logs/VM-{self.name}.log', 'a')
+        self._logger = Logger(f'VM-{self.name}.log')
 
     def __del__(self):
         # wait for tasks to finish
         self._queue.join()
     
-    def initialize(self) -> Controller:
-        self._printLog(f'Starting virtual machine [{self.name}]...')
+    def initialize(self) -> VirtualMachine:
+        self._logger.log(f'Starting virtual machine [{self.name}]...')
         self.start()
         return self
     
     def stop(self):
         self._killed = True
-        self._printLog(f'Stopping virtual machine [{self.name}]...')
+        self._logger.log(f'Stopping virtual machine [{self.name}]...')
 
     def setController(self, controller: Controller):
         self._controller = controller
@@ -41,12 +43,12 @@ class VirtualMachine(Thread):
         self._loadBalancer = loadBalancer
 
     def receiveRequest(self, request: Request):
-        self._printLog(f'Received request [{request.name}] with {len(request.tasks)} Tasks.')
-        self._printLog(f'Enquing the request...')
+        self._logger.log(f'Received request [{request.name}] with {len(request.tasks)} Tasks.')
+        self._logger.log(f'Enquing the request...')
         self._queue.put(request)
     
-    def getCurrentLoad(self) -> [Request]:
-        self._printLog(f'Getting queried for current state')
+    def getCurrentLoad(self) -> List[Request]:
+        self._logger.log(f'Getting queried for current state', LoggingLevel.VERBOSE)
         return list(self._queue.queue)
 
     def run(self):
@@ -57,24 +59,21 @@ class VirtualMachine(Thread):
             except queue.Empty:
                 if self._killed == True:
                     break
-        self._printLog(f'Virtual Machine {self.name} stopped.')
+        self._logger.log(f'Virtual Machine {self.name} stopped.')
     
     def _handleRequest(self, request: Request):
         print("Working on the Task")
-        self._printLog(f'Processing request [{request.name}]...')
+        self._logger.log(f'Processing request [{request.name}]...')
 
         # TODO: implement the algorithm
         time.sleep(0.2)
         self._queue.task_done()
-        self._printLog(f'Finished request [{request.name}].')
+        self._logger.log(f'Finished request [{request.name}].')
         self._notifyController(request)
     
     def _notifyController(self, request: Request):
-        self._printLog(f'Notifying the controller request [{request.name}] has finished.')
+        self._logger.log(f'Notifying the controller request [{request.name}] has finished.')
         self._controller.receiveResponseFromVm(request, self)
-    
-    def _printLog(self, content: str):
-        self._logger.write(f'[{datetime.now()}] {content}\n')
     
     def lockThread(self):
         self.lock.acquire()

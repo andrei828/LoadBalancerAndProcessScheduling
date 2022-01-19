@@ -1,20 +1,11 @@
-from crypt import methods
-import json
-import time
-import random
 from server_controller import ServerController
-from task import Task
-from request import Request
-from controller import Controller
-from loadBalancer import LoadBalancer
-from virtualMachine import VirtualMachine
-from virtualMachineDiagnosticService import VirtualMachineDiagnosticService as VMDiagService
 
 from flask import Flask
 from flask import jsonify, request
 from flask_cors import CORS
+from task import Task
 
-server_controller: ServerController = ServerController()
+server_controller = ServerController()
 
 app = Flask(__name__)
 CORS(app)
