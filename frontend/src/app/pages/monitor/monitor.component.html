@@ -36,6 +36,9 @@
               <h3>Tasks</h3>
               <div class="badge">{{ totalTasks }}</div>
               <span class="spacer"></span>
+              <button mat-icon-button (click)="openRandomDialog()">
+                <mat-icon>shuffle</mat-icon>
+              </button>
               <button mat-raised-button (click)="addTask()">Add task</button>
             </div>
             <div formArrayName="tasks" class="tasks-container">

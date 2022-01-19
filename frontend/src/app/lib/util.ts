@@ -12,3 +12,11 @@ export function groupBy<T, K extends keyof any>(arr: T[], getKey: (item: T) => K
 export function getMaxScrollTop(element: HTMLInputElement) {
   return element.scrollHeight - element.clientHeight;
 }
+
+export function randomBetween(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+export function randomIntBetween(min: number, max: number) {
+  return Math.floor(randomBetween(min, max));
+}
