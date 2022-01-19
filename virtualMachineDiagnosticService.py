@@ -38,13 +38,13 @@ class VirtualMachineDiagnosticService(Thread):
         while True:
             print("Running Diagnostic...")
             self._printLog("Running Diagnostic...")
-            self._queryVirtualMachinesState()
+            self.queryVirtualMachinesState()
             time.sleep(1)
             if self._killed == True:
                 break
         self._printLog(f'Virtual Machine Diagnostic Service stopped.')
 
-    def _queryVirtualMachinesState(self):
+    def queryVirtualMachinesState(self):
         virtualMachinesState = {}
         for virtualMachine in self._virtualMachines:
             self._printLog(f'Locking Virtual Machine [{virtualMachine.name}]...')
@@ -59,6 +59,7 @@ class VirtualMachineDiagnosticService(Thread):
             virtualMachinesState[virtualMachine.name] = { 'percentage': runningPercentage, 'queue': currentLoad }
         
         self._printLog(json.dumps(virtualMachinesState, cls=CustomJsonEncoder))
+        return virtualMachinesState
 
     def _printLog(self, content: str):
         self._logger.write(f'[{datetime.now()}] {content}\n')
