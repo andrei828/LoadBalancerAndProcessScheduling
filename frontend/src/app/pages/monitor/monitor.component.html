@@ -1,0 +1,78 @@
+<div class="toolbar-view">
+  <mat-toolbar>
+    <span>Monitor</span>
+    <span class="spacer"></span>
+    <button mat-raised-button (click)="configure()">Reconfigure</button>
+  </mat-toolbar>
+  <div class="main-content container" #container>
+    <mat-grid-list cols="3" rows="2" [rowHeight]="rowHeigth">
+      <mat-grid-tile colspan="2" rowspan="2">
+        <div class="tile-content">
+          <ngx-charts-bar-vertical
+            [results]="vmDataArray"
+            [xAxis]="true"
+            [yAxis]="true"
+            theme="dark"
+            [legend]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            [yScaleMin]="0"
+            [yScaleMax]="1"
+            xAxisLabel="VMs"
+            yAxisLabel="Load Percentage"
+          >
+          </ngx-charts-bar-vertical>
+        </div>
+      </mat-grid-tile>
+      <mat-grid-tile>
+        <div class="tile-content toolbar-view">
+          <mat-toolbar>
+            <span>Send request</span>
+            <span class="spacer"></span>
+            <button mat-raised-button (click)="sendRequest()" [disabled]="sendRequestForm.invalid">Send</button>
+          </mat-toolbar>
+          <form class="main-content request-container" [formGroup]="sendRequestForm">
+            <div class="tasks-header">
+              <h3>Tasks</h3>
+              <div class="badge">{{ totalTasks }}</div>
+              <span class="spacer"></span>
+              <button mat-raised-button (click)="addTask()">Add task</button>
+            </div>
+            <div formArrayName="tasks" class="tasks-container">
+              <mat-card *ngFor="let task of taskFormArray.controls; let index = index" [formGroupName]="index" class="task">
+                <span class="task-name">Task {{ totalTasks - index }}</span>
+                <mat-form-field class="task-duration">
+                  <mat-label>Duration</mat-label>
+                  <input matInput type="number" formControlName="duration" />
+                </mat-form-field>
+              </mat-card> 
+            </div>
+          </form>
+        </div>
+      </mat-grid-tile>
+      <mat-grid-tile>
+        <div class="tile-content toolbar-view">
+          <mat-toolbar>
+            <span>Logs</span>
+            <span class="spacer"></span>
+            <mat-form-field class="category-select">
+              <mat-label>From</mat-label>
+              <mat-select [formControl]="selectedLogsFrom">
+                <mat-option [value]="null">All</mat-option>
+                <mat-option [value]="option" *ngFor="let option of logsFromOptions">{{ option }}</mat-option>
+              </mat-select> 
+            </mat-form-field>
+          </mat-toolbar>
+          <div class="main-content logs-container" #logsContainer>
+            <div class="log" *ngFor="let log of selectedLogsArray">
+              <span class="log-timestamp">[{{ log.timestamp }}]</span>
+              <span class="log-level"> {{ log.level }}</span>
+              <span class="log-from"> {{ log.from }}:</span>
+              <span class="log-content"> {{ log.content }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
+</div>

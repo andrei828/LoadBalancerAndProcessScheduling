@@ -1,4 +1,5 @@
 from __future__ import annotations
+from re import VERBOSE
 from threading import Thread
 from datetime import datetime
 import threading, queue
@@ -7,7 +8,10 @@ import copy
 import time
 from json import JSONEncoder
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
+from logger import Logger
+
+from logging_level import LoggingLevel
 if TYPE_CHECKING:
     from request import Request
     from loadBalancer import LoadBalancer
@@ -19,48 +23,46 @@ class CustomJsonEncoder(JSONEncoder):
 
 class VirtualMachineDiagnosticService(Thread):
 
-    def __init__(self, virtualMachines: [VirtualMachine] = None):
+    def __init__(self, virtualMachines: List[VirtualMachine] = None):
         Thread.__init__(self)
         self._killed = False
         self._virtualMachines = virtualMachines
-        self._logger = open(f'logs/VirtualMachineDiagnosticService.log', 'a')
+        self._logger = Logger(f'VirtualMachineDiagnosticService.log')
     
     def initialize(self) -> VirtualMachineDiagnosticService:
-        self._printLog(f'Starting virtual machine diagnostic service...')
+        self._logger.log(f'Starting virtual machine diagnostic service...')
         self.start()
         return self
     
     def stop(self):
         self._killed = True
-        self._printLog(f'Stopping virtual machine diagnostic service...')
+        self._logger.log(f'Stopping virtual machine diagnostic service...')
     
     def run(self):
         while True:
-            print("Running Diagnostic...")
-            self._printLog("Running Diagnostic...")
-            self._queryVirtualMachinesState()
+            self._logger.log("Running Diagnostic...", LoggingLevel.VERBOSE)
+            self.queryVirtualMachinesState()
             time.sleep(1)
             if self._killed == True:
                 break
-        self._printLog(f'Virtual Machine Diagnostic Service stopped.')
+        self._logger.log(f'Virtual Machine Diagnostic Service stopped.')
 
-    def _queryVirtualMachinesState(self):
+    def queryVirtualMachinesState(self):
         virtualMachinesState = {}
         for virtualMachine in self._virtualMachines:
-            self._printLog(f'Locking Virtual Machine [{virtualMachine.name}]...')
+            self._logger.log(f'Locking Virtual Machine [{virtualMachine.name}]...', LoggingLevel.VERBOSE)
             virtualMachine.lockThread()
 
             currentLoad = copy.deepcopy(virtualMachine.getCurrentLoad())
             runningPercentage = virtualMachine.runningPercentage
 
-            self._printLog(f'Releasing Virtual Machine [{virtualMachine.name}]...')
+            self._logger.log(f'Releasing Virtual Machine [{virtualMachine.name}]...', LoggingLevel.VERBOSE)
             virtualMachine.unlockThread()
 
             virtualMachinesState[virtualMachine.name] = { 'percentage': runningPercentage, 'queue': currentLoad }
         
-        self._printLog(json.dumps(virtualMachinesState, cls=CustomJsonEncoder))
+        self._logger.log(json.dumps(virtualMachinesState), LoggingLevel.VERBOSE)
+        return virtualMachinesState
 
-    def _printLog(self, content: str):
-        self._logger.write(f'[{datetime.now()}] {content}\n')
 
     

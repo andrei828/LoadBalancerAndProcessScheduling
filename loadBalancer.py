@@ -1,5 +1,8 @@
 from __future__ import annotations
+from logger import Logger
+from logging_level import LoggingLevel
 from virtualMachine import VirtualMachine
+from request import Request
 from controller import Controller
 from datetime import datetime
 from threading import Thread
@@ -18,7 +21,7 @@ class LoadBalancer(Thread):
         Thread.__init__(self)
         self._killed = False
         self._virtualMachines = virtualMachines
-        self._logger = open(f'logs/LoadBalancer.log', 'a')
+        self._logger = Logger('LoadBalancer.log')
 
     def initialize(self) -> LoadBalancer:
         self._virtualMachinesDictionary = {}
@@ -26,13 +29,13 @@ class LoadBalancer(Thread):
             virtualMachine.setLoadBalancer(self)
             self._virtualMachinesDictionary[virtualMachine] = virtualMachine.runningPercentage
 
-        self._printLog(f'Starting Load Balancer...')
+        self._logger.log(f'Starting Load Balancer...')
         self.start()
         return self
     
     def stop(self):
         self._killed = True
-        self._printLog(f'Stopping Load Balancer and all associated VMs...')
+        self._logger.log(f'Stopping Load Balancer and all associated VMs...')
         for virtualMachine in self._virtualMachines:
             virtualMachine.stop()
     
@@ -43,7 +46,7 @@ class LoadBalancer(Thread):
 
     def receiveRequest(self, request: Request):
         print('Received request from controller')
-        self._printLog(f'Received request [{request.name}] with {len(request.tasks)} Tasks.')
+        self._logger.log(f'Received request [{request.name}] with {len(request.tasks)} Tasks.')
         vm = self._chooseVirtualMachine(request)
         self._respondToController(request, vm)
     
@@ -53,17 +56,17 @@ class LoadBalancer(Thread):
             time.sleep(1)
             if self._killed == True:
                 break
-        self._printLog(f'Load Balancer stopped.')
+        self._logger.log(f'Load Balancer stopped.')
     
     def _chooseVirtualMachine(self, item: Request) -> VirtualMachine:
         print(f'Querying VMs for the best match...')
-        self._printLog(f'Querying VMs for the best match...')
+        self._logger.log(f'Querying VMs for the best match...')
 
         # TODO: implement the algorithm for choosing VMs
         vm = self._virtualMachines[random.randint(0, len(self._virtualMachines) - 1)]
         
         print(f'Found VM: {vm.name}.')
-        self._printLog(f'Virtual Machine [{vm.name}] has been chosen.')
+        self._logger.log(f'Virtual Machine [{vm.name}] has been chosen.')
         return vm
 
     def _respondToController(self, request: Request, virtualMachine: VirtualMachine):
@@ -71,10 +74,8 @@ class LoadBalancer(Thread):
         self._controller.receiveLoadBalancerDecision(request, virtualMachine)
     
     def _pingVirtualMachines(self):
-        self._printLog(f'Pinging Virtual Machines to check their health and load.')
+        self._logger.log(f'Pinging Virtual Machines to check their health and load.', LoggingLevel.VERBOSE)
         # TODO: find a thread safe solution 
         for virtualMachine in self._virtualMachines:
             self._virtualMachinesDictionary[virtualMachine] = virtualMachine.runningPercentage
     
-    def _printLog(self, content: str):
-        self._logger.write(f'[{datetime.now()}] {content}\n')

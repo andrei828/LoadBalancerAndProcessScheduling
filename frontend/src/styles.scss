@@ -1,0 +1,39 @@
+@import "../node_modules/@angular/material/prebuilt-themes/pink-bluegrey.css";
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: #303030; 
+  color: #fff;
+}
+
+.toolbar-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .main-content {
+    flex: 1;
+    overflow: auto;
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+ngx-charts-bar-vertical {
+  text {
+    fill: #a0aabe;
+  }
+}
+
+.badge {
+  padding: 4px 6px;
+  background: #616161;
+  min-width: 12px;
+  text-align: center;
+  border-radius: 4px;
+}

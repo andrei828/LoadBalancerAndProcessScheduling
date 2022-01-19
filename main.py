@@ -1,30 +1,31 @@
-import time
-import random
+from server_controller import ServerController
+
+from flask import Flask
+from flask import jsonify, request
+from flask_cors import CORS
 from task import Task
-from request import Request
-from controller import Controller
-from loadBalancer import LoadBalancer
-from virtualMachine import VirtualMachine
-from virtualMachineDiagnosticService import VirtualMachineDiagnosticService as VMDiagService
 
-# register services
-virtualMachines = [VirtualMachine().initialize() for _ in range(3)]
-vmDiagService = VMDiagService(virtualMachines).initialize()
-loadBalancer = LoadBalancer(virtualMachines).initialize()
-controller = Controller().initialize()
-loadBalancer.setController(controller)
-controller.setLoadBalancer(loadBalancer)
+server_controller = ServerController()
 
-# send requests
-for i in range(100):
-    controller.receiveRequest(Request([Task(random.randint(1, 50)) for _ in range(random.randint(1, 5))]))
+app = Flask(__name__)
+CORS(app)
 
-# do other stuff on main thread
-time.sleep(10)
+@app.route("/monitor")
+def monitor():
+    return jsonify(server_controller.monitor())
 
-# stop the services
-vmDiagService.stop()
-loadBalancer.stop()
-controller.stop()
-for virtualMachine in virtualMachines:
-    virtualMachine.stop()
+@app.route("/logs")
+def get_logs():
+    return jsonify(server_controller.get_logs())
+
+
+@app.route("/configure", methods = ["POST"])
+def configure():
+    vm_number = request.get_json()["vm_number"]
+    return jsonify(server_controller.configure(vm_number))
+
+@app.route("/send", methods = ["POST"])
+def send_request():
+    tasks = request.get_json()["tasks"]
+    tasks_obj = [ Task(task["duration"]) for task in tasks]
+    return jsonify(server_controller.send_request(tasks_obj))
