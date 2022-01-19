@@ -1,12 +1,13 @@
 from __future__ import annotations
 from re import VERBOSE
+from json import JSONEncoder
 from threading import Thread
 from datetime import datetime
+from functools import reduce
 import threading, queue
 import json
 import copy
 import time
-from json import JSONEncoder
 
 from typing import TYPE_CHECKING, List
 from logger import Logger
@@ -54,8 +55,15 @@ class VirtualMachineDiagnosticService(Thread):
             virtualMachine.lockThread()
 
             currentLoad = copy.deepcopy(virtualMachine.getCurrentLoad())
-            runningPercentage = virtualMachine.runningPercentage
+            if virtualMachine.runningRequest:
+                currentLoad.append(copy.deepcopy(virtualMachine.runningRequest))
 
+            totalDurationForVm = 0
+            for request in currentLoad:
+                totalDurationForVm += reduce(lambda accumulator, task: accumulator + task.duration, request.tasks, 0)
+            
+            runningPercentage = min(1, max(0.05, round(totalDurationForVm / 1000, 3)))
+            
             self._logger.log(f'Releasing Virtual Machine [{virtualMachine.name}]...', LoggingLevel.VERBOSE)
             virtualMachine.unlockThread()
 

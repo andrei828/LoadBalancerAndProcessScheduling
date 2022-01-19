@@ -22,7 +22,7 @@ class VirtualMachine(Thread):
         Thread.__init__(self)
         self.lock = Lock()
         self._killed = False
-        self.runningPercentage = 0
+        self.runningRequest = None
         self._queue = queue.Queue()
         self._logger = Logger(f'VM-{self.name}.log')
 
@@ -68,8 +68,11 @@ class VirtualMachine(Thread):
         print("Working on the Task")
         self._logger.log(f'Processing request [{request.name}]...')
 
+        self.runningRequest = request
         self._processTasks(request)
         self._queue.task_done()
+        self.runningRequest = None
+        
         self._logger.log(f'Finished request [{request.name}].')
         self._notifyController(request)
     
