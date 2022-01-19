@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>Configure</h2>
+<mat-dialog-content>
+  <form [formGroup]="configureForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Number of VMs</mat-label>
+      <input matInput type="number" formControlName="vmNumber"/>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close cdkFocusInitial>Cancel</button>
+  <button mat-button (click)="configure()">Configure</button>
+</mat-dialog-actions>
