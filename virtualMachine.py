@@ -1,5 +1,6 @@
 from __future__ import annotations
 from asyncio import tasks
+from copy import copy
 from datetime import datetime
 from threading import Thread, Lock
 from logger import Logger
@@ -86,6 +87,12 @@ class VirtualMachine(Thread):
     def unlockThread(self):
         self.lock.release()
 
+    def _sleepForTask(task: Task):
+        while task.duration > 0:
+            sleepTime = min(task.duration, 0.5)
+            time.sleep(sleepTime)
+            task.duration -= sleepTime
+
     def _processTasks(self, request: Request):
         request.tasks.sort(key=lambda x: x.duration)
         while True:
@@ -95,12 +102,12 @@ class VirtualMachine(Thread):
             task = request.tasks[0]
             if task.duration - tq <= 0:
                 self._logger.log(f'processing Task {task.name} in {task.duration}')
-                time.sleep(task.duration)
+                VirtualMachine._sleepForTask(task)
             else:
                 task.duration = task.duration - tq
-                request.tasks.append(task)
+                request.tasks.append(copy.deepcopy(task))
                 self._logger.log(f'processing Task {task.name} in {tq}')
-                time.sleep(tq)
+                VirtualMachine._sleepForTask(task)
             request.tasks.pop(0)
 
     def _calculateTQ(self, tasks: List[Task]):
