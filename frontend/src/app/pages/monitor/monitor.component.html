@@ -34,11 +34,13 @@
           <form class="main-content request-container" [formGroup]="sendRequestForm">
             <div class="tasks-header">
               <h3>Tasks</h3>
+              <div class="badge">{{ totalTasks }}</div>
+              <span class="spacer"></span>
               <button mat-raised-button (click)="addTask()">Add task</button>
             </div>
             <div formArrayName="tasks" class="tasks-container">
               <mat-card *ngFor="let task of taskFormArray.controls; let index = index" [formGroupName]="index" class="task">
-                <span class="task-name">Task {{ index + 1 }}</span>
+                <span class="task-name">Task {{ totalTasks - index }}</span>
                 <mat-form-field class="task-duration">
                   <mat-label>Duration</mat-label>
                   <input matInput type="number" formControlName="duration" />

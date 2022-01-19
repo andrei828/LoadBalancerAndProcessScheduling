@@ -37,12 +37,12 @@ export class MonitorComponent implements OnInit, AfterViewInit, AfterViewChecked
   vmDataArray: any[] = [];
 
   logs: Log[] = [
-    {
-      "content": "Starting virtual machine [Thread-3]...",
-      "from": "VM-Thread-3",
-      "level": "INFO",
-      "timestamp": "2022-01-19 15:16:06.490953"
-    },
+    // {
+    //   "content": "Starting virtual machine [Thread-3]...",
+    //   "from": "VM-Thread-3",
+    //   "level": "INFO",
+    //   "timestamp": "2022-01-19 15:16:06.490953"
+    // },
   ];
   groupedLogs: { [name: string]: Log[] } = {};
   selectedLogsArray: Log[] = this.logs;
@@ -113,11 +113,15 @@ export class MonitorComponent implements OnInit, AfterViewInit, AfterViewChecked
     return this.sendRequestForm.get("tasks") as FormArray;
   }
 
+  get totalTasks() {
+    return this.taskFormArray.controls.length;
+  }
+
   addTask() {
     const task = new FormGroup({
       duration: new FormControl(null, [Validators.required])
     });
-    this.taskFormArray.push(task);
+    this.taskFormArray.insert(0, task);
   }
 
   configure() {
