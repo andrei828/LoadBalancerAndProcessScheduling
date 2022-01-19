@@ -142,7 +142,7 @@ export class MonitorComponent implements OnInit, AfterViewInit, AfterViewChecked
 
   computeArray() {
     this.vmDataArray = Object.entries(this.vmData).map(([name, vmData]) => {
-      return { name, value: vmData.percentage || 0.5 };
+      return { name, value: vmData.percentage };
     });
   }
 

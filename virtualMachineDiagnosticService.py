@@ -61,8 +61,8 @@ class VirtualMachineDiagnosticService(Thread):
 
             virtualMachinesState[virtualMachine.name] = { 'percentage': runningPercentage, 'queue': currentLoad }
         
-        self._logger.log(json.dumps(virtualMachinesState), LoggingLevel.VERBOSE)
-        return virtualMachinesState
+        # self._logger.log(str(json.dumps(virtualMachinesState, cls=CustomJsonEncoder)), LoggingLevel.VERBOSE)
+        return json.loads(json.dumps(virtualMachinesState, cls=CustomJsonEncoder))
 
 
     

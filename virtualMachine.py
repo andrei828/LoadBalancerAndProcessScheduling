@@ -68,10 +68,7 @@ class VirtualMachine(Thread):
         print("Working on the Task")
         self._logger.log(f'Processing request [{request.name}]...')
 
-        # TODO: implement the algorithm
-        t = Thread(target=self._processTasks, args=(request,))
-        t.start()
-        #time.sleep(0.2)
+        self._processTasks(request)
         self._queue.task_done()
         self._logger.log(f'Finished request [{request.name}].')
         self._notifyController(request)
@@ -95,20 +92,20 @@ class VirtualMachine(Thread):
             for task in request.tasks:
                 request.tasks.pop(0)
                 if task.duration - tq <= 0:
-                    print(f'processing Task {task.name} in {task.duration}')
+                    self._logger.log(f'processing Task {task.name} in {task.duration}')
                     time.sleep(task.duration)
                 else:
                     task.duration = task.duration - tq
                     request.tasks.append(task)
-                    print(f'processing Task {task.name} in {tq}')
+                    self._logger.log(f'processing Task {task.name} in {tq}')
                     time.sleep(tq)
 
     def _calculateTQ(self, tasks: List[Task]):
         size = len(tasks)
         if size%2:
-            median = tasks[size/2].duration
+            median = tasks[size // 2].duration
         else:
-            median = (tasks[size/2 - 1].duration + tasks[size/2].duration) / 2
+            median = (tasks[size // 2 - 1].duration + tasks[size // 2].duration) // 2
         mean = sum(t.duration for t in tasks) / size
 
-        return (mean + median) / 2
+        return (mean + median) // 2
