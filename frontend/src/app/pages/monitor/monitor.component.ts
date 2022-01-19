@@ -129,6 +129,12 @@ export class MonitorComponent implements OnInit, AfterViewInit, AfterViewChecked
 
     this.configureDialogRef.afterClosed().subscribe(result => {
       this.configureDialogRef = null;
+
+      if(result) {
+        this.logs = [];
+        this.selectedLogsFrom.setValue(null);
+        this.computeGroupedLogs();
+      }
     });
   }
 
