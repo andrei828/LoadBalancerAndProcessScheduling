@@ -42,4 +42,15 @@ mat-grid-list {
 .logs-container {
   font-family: 'Courier New', Courier, monospace;
   padding: 8px;
+
+  .log {
+    .log-from {
+      font-weight: bold;
+    }
+  }
+}
+
+
+.category-select {
+  font-size: 14px;
 }

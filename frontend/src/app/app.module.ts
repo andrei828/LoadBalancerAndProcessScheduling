@@ -11,6 +11,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { HttpClientModule } from '@angular/common/http';
 import { ConfigureComponent } from './components/configure/configure.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 
 
 @NgModule({
@@ -30,7 +31,9 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     NgxChartsModule,
     MaterialModule
   ],
-  providers: [],
+  providers: [
+    { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 4000 } },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

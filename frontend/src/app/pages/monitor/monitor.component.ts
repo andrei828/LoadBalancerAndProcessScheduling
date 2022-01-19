@@ -1,4 +1,4 @@
-import { AfterContentInit, AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { interval, Subscription } from 'rxjs';
@@ -9,6 +9,8 @@ import { startWith, switchMap } from 'rxjs/operators';
 import { Request } from 'src/app/lib/model/Request';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayLenghtValidator } from 'src/app/lib/validators/ArrayLengthValidator';
+import { Log } from 'src/app/lib/model/Log';
+import { getMaxScrollTop, groupBy } from 'src/app/lib/util';
 
 
 @Component({
@@ -16,7 +18,7 @@ import { ArrayLenghtValidator } from 'src/app/lib/validators/ArrayLengthValidato
   templateUrl: './monitor.component.html',
   styleUrls: ['./monitor.component.scss']
 })
-export class MonitorComponent implements OnInit, AfterViewInit {
+export class MonitorComponent implements OnInit, AfterViewInit, AfterViewChecked {
 
   constructor(private monitor: MonitorService, private dialog: MatDialog, private snackbar: MatSnackBar) { }
 
@@ -25,6 +27,7 @@ export class MonitorComponent implements OnInit, AfterViewInit {
   });
 
   @ViewChild('container') container!: ElementRef<HTMLInputElement>;
+  @ViewChild('logsContainer') logsContainer!: ElementRef<HTMLInputElement>;
 
   rowHeigth: number = 0;
 
@@ -32,6 +35,22 @@ export class MonitorComponent implements OnInit, AfterViewInit {
   configureDialogRef!: MatDialogRef<ConfigureComponent> | null;
   vmDataSubscription!: Subscription;
   vmDataArray: any[] = [];
+
+  logs: Log[] = [
+    {
+      "content": "Starting virtual machine [Thread-3]...",
+      "from": "VM-Thread-3",
+      "level": "INFO",
+      "timestamp": "2022-01-19 15:16:06.490953"
+    },
+  ];
+  groupedLogs: { [name: string]: Log[] } = {};
+  selectedLogsArray: Log[] = this.logs;
+  logSubscription!: Subscription;
+
+  selectedLogsFrom = new FormControl(null);
+  logsFromOptions: string[] = [];
+
 
   ngOnInit(): void {
     this.vmDataSubscription = interval(1000)
@@ -45,13 +64,44 @@ export class MonitorComponent implements OnInit, AfterViewInit {
       if(result) {
         this.computeArray();
       }
-    })
+    });
+
+    this.logSubscription = interval(1000)
+      .pipe(switchMap(_ => this.monitor.getLogs()))
+      .subscribe(logs => {
+        this.logs = this.logs.concat(logs);
+        this.computeGroupedLogs();
+      });
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.onResize();
     }, 0);
+  }
+
+  ngAfterViewChecked(): void {
+    this.scrollLogsContainer();
+  }
+
+  computeGroupedLogs() {
+    this.groupedLogs = groupBy(this.logs, (log) => log.from);
+    this.logsFromOptions = Object.keys(this.groupedLogs).sort();
+    const selected = this.selectedLogsFrom.value;
+    if(!selected) {
+      this.selectedLogsArray = this.logs;
+    } else {
+      this.selectedLogsArray = this.groupedLogs[selected];
+    }
+    this.scrollLogsContainer();
+  }
+
+  scrollLogsContainer() {
+    let el = this.logsContainer.nativeElement;
+    if(el.scrollTop < getMaxScrollTop(el)) return;
+    try {
+      this.logsContainer.nativeElement.scrollTop = this.logsContainer.nativeElement.scrollHeight;
+    } catch(err) { }
   }
 
   @HostListener('window:resize', ['$event'])
@@ -80,7 +130,7 @@ export class MonitorComponent implements OnInit, AfterViewInit {
 
   computeArray() {
     this.vmDataArray = Object.entries(this.vmData).map(([name, vmData]) => {
-      return { name, value: vmData.percentage || 1 };
+      return { name, value: vmData.percentage || 0.5 };
     });
   }
 

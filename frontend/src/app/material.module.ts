@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
 
 
 const materialDeps = [
@@ -18,7 +19,8 @@ const materialDeps = [
   MatCardModule,
   MatIconModule,
   MatDialogModule,
-  MatSnackBarModule
+  MatSnackBarModule,
+  MatSelectModule
 ]
 
 @NgModule({

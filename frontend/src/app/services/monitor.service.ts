@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { Log } from '../lib/model/Log';
 import { Request } from '../lib/model/Request';
 import { VmDataMap } from '../lib/model/VmDataMap';
 
@@ -25,5 +26,10 @@ export class MonitorService {
   sendRequest(request: Request): Observable<VmDataMap> {
     const url = `${environment.apiUrl}/send`;
     return this.http.post<VmDataMap>(url, request);
+  }
+
+  getLogs(): Observable<Log[]> {
+    const url = `${environment.apiUrl}/logs`;
+    return this.http.get<Log[]>(url);
   }
 }

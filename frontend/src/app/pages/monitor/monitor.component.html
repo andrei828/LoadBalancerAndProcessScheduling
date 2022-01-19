@@ -50,9 +50,24 @@
       </mat-grid-tile>
       <mat-grid-tile>
         <div class="tile-content toolbar-view">
-          <mat-toolbar>Logs</mat-toolbar>
-          <div class="main-content logs-container">
-            Test log
+          <mat-toolbar>
+            <span>Logs</span>
+            <span class="spacer"></span>
+            <mat-form-field class="category-select">
+              <mat-label>From</mat-label>
+              <mat-select [formControl]="selectedLogsFrom">
+                <mat-option [value]="null">All</mat-option>
+                <mat-option [value]="option" *ngFor="let option of logsFromOptions">{{ option }}</mat-option>
+              </mat-select> 
+            </mat-form-field>
+          </mat-toolbar>
+          <div class="main-content logs-container" #logsContainer>
+            <div class="log" *ngFor="let log of selectedLogsArray">
+              <span class="log-timestamp">[{{ log.timestamp }}]</span>
+              <span class="log-level"> {{ log.level }}</span>
+              <span class="log-from"> {{ log.from }}:</span>
+              <span class="log-content"> {{ log.content }}</span>
+            </div>
           </div>
         </div>
       </mat-grid-tile>
