@@ -14,6 +14,10 @@ CORS(app)
 def monitor():
     return jsonify(server_controller.monitor())
 
+@app.route("/logs")
+def get_logs():
+    return jsonify(server_controller.get_logs())
+
 
 @app.route("/configure", methods = ["POST"])
 def configure():
