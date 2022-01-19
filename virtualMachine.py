@@ -1,4 +1,5 @@
 from __future__ import annotations
+from asyncio import tasks
 from datetime import datetime
 from threading import Thread, Lock
 from logger import Logger
@@ -10,6 +11,8 @@ import json
 import time
 
 from typing import TYPE_CHECKING, List
+
+from task import Task
 if TYPE_CHECKING:
     from loadBalancer import LoadBalancer
     from controller import Controller
@@ -66,7 +69,9 @@ class VirtualMachine(Thread):
         self._logger.log(f'Processing request [{request.name}]...')
 
         # TODO: implement the algorithm
-        time.sleep(0.2)
+        t = Thread(target=self._processTasks, args=(request,))
+        t.start()
+        #time.sleep(0.2)
         self._queue.task_done()
         self._logger.log(f'Finished request [{request.name}].')
         self._notifyController(request)
@@ -80,3 +85,30 @@ class VirtualMachine(Thread):
     
     def unlockThread(self):
         self.lock.release()
+
+    def _processTasks(self, request: Request):
+        request.tasks.sort(key=lambda x: x.duration)
+        while True:
+            if len(request.tasks) <= 0:
+                return
+            tq = self._calculateTQ(request.tasks)
+            for task in request.tasks:
+                request.tasks.pop(0)
+                if task.duration - tq <= 0:
+                    print(f'processing Task {task.name} in {task.duration}')
+                    time.sleep(task.duration)
+                else:
+                    task.duration = task.duration - tq
+                    request.tasks.append(task)
+                    print(f'processing Task {task.name} in {tq}')
+                    time.sleep(tq)
+
+    def _calculateTQ(self, tasks: List[Task]):
+        size = len(tasks)
+        if size%2:
+            median = tasks[size/2].duration
+        else:
+            median = (tasks[size/2 - 1].duration + tasks[size/2].duration) / 2
+        mean = sum(t.duration for t in tasks) / size
+
+        return (mean + median) / 2
