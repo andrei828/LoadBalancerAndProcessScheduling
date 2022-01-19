@@ -92,16 +92,16 @@ class VirtualMachine(Thread):
             if len(request.tasks) <= 0:
                 return
             tq = self._calculateTQ(request.tasks)
-            for task in request.tasks:
-                request.tasks.pop(0)
-                if task.duration - tq <= 0:
-                    self._logger.log(f'processing Task {task.name} in {task.duration}')
-                    time.sleep(task.duration)
-                else:
-                    task.duration = task.duration - tq
-                    request.tasks.append(task)
-                    self._logger.log(f'processing Task {task.name} in {tq}')
-                    time.sleep(tq)
+            task = request.tasks[0]
+            if task.duration - tq <= 0:
+                self._logger.log(f'processing Task {task.name} in {task.duration}')
+                time.sleep(task.duration)
+            else:
+                task.duration = task.duration - tq
+                request.tasks.append(task)
+                self._logger.log(f'processing Task {task.name} in {tq}')
+                time.sleep(tq)
+            request.tasks.pop(0)
 
     def _calculateTQ(self, tasks: List[Task]):
         size = len(tasks)
