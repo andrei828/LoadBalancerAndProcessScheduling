@@ -20,6 +20,9 @@ mat-grid-list {
       margin: 0;
       margin-right: 6px;
     }
+    button + button {
+      margin-left: 8px;
+    }
   }
 
   .tasks-container {

@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>Generate random tasks</h2>
+<mat-dialog-content>
+  <form [formGroup]="randomForm" fxLayout="row grid" fxLayoutGap="10px grid">
+    <mat-form-field appearance="outline" fxFlex="50">
+      <mat-label>Min task number</mat-label>
+      <input matInput type="number" formControlName="minTaskNumber" name="minTaskNumber"/>
+    </mat-form-field>
+    <mat-form-field appearance="outline" fxFlex="50">
+      <mat-label>Max task number</mat-label>
+      <input matInput type="number" formControlName="maxTaskNumber" name="maxTaskNumber"/>
+    </mat-form-field>
+    <mat-form-field appearance="outline" fxFlex="50">
+      <mat-label>Min task duration</mat-label>
+      <input matInput type="number" formControlName="minTaskDuration" name="minTaskDuration"/>
+      <mat-hint>Measure unit: <b>Seconds</b></mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline" fxFlex="50">
+      <mat-label>Max task duration</mat-label>
+      <input matInput type="number" formControlName="maxTaskDuration" name="maxTaskDuration"/>
+      <mat-hint>Measure unit: <b>Seconds</b></mat-hint>
+
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button (click)="generate()">Generate</button>
+</mat-dialog-actions>

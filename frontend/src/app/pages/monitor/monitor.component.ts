@@ -11,6 +11,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArrayLenghtValidator } from 'src/app/lib/validators/ArrayLengthValidator';
 import { Log } from 'src/app/lib/model/Log';
 import { getMaxScrollTop, groupBy } from 'src/app/lib/util';
+import { RandomTasksComponent } from 'src/app/components/random-tasks/random-tasks.component';
+import { Task } from 'src/app/lib/model/Task';
 
 
 @Component({
@@ -117,9 +119,9 @@ export class MonitorComponent implements OnInit, AfterViewInit, AfterViewChecked
     return this.taskFormArray.controls.length;
   }
 
-  addTask() {
+  addTask(from?: Task) {
     const task = new FormGroup({
-      duration: new FormControl(null, [Validators.required])
+      duration: new FormControl(from?.duration, [Validators.required])
     });
     this.taskFormArray.insert(0, task);
   }
@@ -154,6 +156,19 @@ export class MonitorComponent implements OnInit, AfterViewInit, AfterViewChecked
         this.sendRequestForm = new FormGroup({
           tasks: new FormArray([], [ArrayLenghtValidator({ min: 1})]),
         });
+      }
+    });
+  }
+
+  openRandomDialog() {
+    let dialogRef = this.dialog.open<RandomTasksComponent, any, Task[]>(RandomTasksComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        this.sendRequestForm = new FormGroup({
+          tasks: new FormArray([], [ArrayLenghtValidator({ min: 1})]),
+        });
+        result.forEach(task => this.addTask(task));
       }
     });
   }

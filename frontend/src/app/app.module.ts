@@ -12,13 +12,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { ConfigureComponent } from './components/configure/configure.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { RandomTasksComponent } from './components/random-tasks/random-tasks.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     MonitorComponent,
-    ConfigureComponent
+    ConfigureComponent,
+    RandomTasksComponent
   ],
   imports: [
     BrowserModule,
