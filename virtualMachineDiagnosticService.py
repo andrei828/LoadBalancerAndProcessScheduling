@@ -62,7 +62,7 @@ class VirtualMachineDiagnosticService(Thread):
             for request in currentLoad:
                 totalDurationForVm += reduce(lambda accumulator, task: accumulator + task.duration, request.tasks, 0)
             
-            runningPercentage = min(1, max(0.05, round(totalDurationForVm / 1000, 3)))
+            runningPercentage = min(1, round(0.05 + totalDurationForVm / 1000, 3))
             
             self._logger.log(f'Releasing Virtual Machine [{virtualMachine.name}]...', LoggingLevel.VERBOSE)
             virtualMachine.unlockThread()
